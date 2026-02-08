@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speed Reader - RSVP</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Upload Area -->
+  <section id="upload-area" class="upload-area">
+    <div class="upload-content">
+      <div class="upload-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h1>Speed Reader</h1>
+      <p>Drop a file here or click to upload</p>
+      <p class="upload-formats">Supports TXT, PDF, DOCX, EPUB</p>
+      <input type="file" id="file-input" accept=".txt,.pdf,.docx,.epub" hidden>
+      <button id="upload-btn" class="btn btn-primary">Choose File</button>
+    </div>
+  </section>
+
+  <!-- Reader Section -->
+  <section id="reader-section" class="reader-section hidden">
+    <!-- File info bar -->
+    <div class="file-info-bar">
+      <span id="file-name" class="file-name"></span>
+      <div class="file-info-actions">
+        <select id="chapter-select" class="chapter-select hidden">
+          <option value="">Select Chapter</option>
+        </select>
+        <button id="new-file-btn" class="btn btn-small" title="Load new file">New File</button>
+        <button id="settings-btn" class="btn btn-small" title="Settings (?)">Settings</button>
+      </div>
+    </div>
+
+    <!-- RSVP Display -->
+    <div class="rsvp-container">
+      <div class="focus-guide left"></div>
+      <div id="word-display" class="word-display">
+        <span class="word-placeholder">Press play to start</span>
+      </div>
+      <div class="focus-guide right"></div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div id="progress-bar" class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <span id="progress-text" class="progress-text">0%</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button id="skip-back-btn" class="btn btn-control" title="Skip back (Left Arrow)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button id="play-pause-btn" class="btn btn-play" title="Play/Pause (Space)">
+        <svg id="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pause-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="hidden"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
+      </button>
+      <button id="skip-forward-btn" class="btn btn-control" title="Skip forward (Right Arrow)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6v12l8.5-6zm10 0v12h2V6z"/></svg>
+      </button>
+      <div class="speed-control">
+        <input type="range" id="speed-slider" min="50" max="1500" step="25" value="300">
+        <span id="wpm-display" class="wpm-display">300 WPM</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Settings Panel -->
+  <div id="settings-panel" class="settings-panel hidden">
+    <div class="settings-content">
+      <div class="settings-header">
+        <h2>Settings</h2>
+        <button id="close-settings-btn" class="btn btn-small">&times;</button>
+      </div>
+      <div class="setting-group">
+        <label>Theme</label>
+        <button id="theme-toggle-btn" class="btn btn-primary">Toggle Dark Mode</button>
+      </div>
+      <div class="setting-group">
+        <label>Saved Progress</label>
+        <button id="clear-progress-btn" class="btn btn-secondary">Clear Saved Progress</button>
+      </div>
+      <div class="setting-group">
+        <h3>Keyboard Shortcuts</h3>
+        <table class="shortcut-table">
+          <tbody>
+            <tr><td><kbd>Space</kbd></td><td>Play / Pause</td></tr>
+            <tr><td><kbd>Up</kbd></td><td>Increase speed +25 WPM</td></tr>
+            <tr><td><kbd>Down</kbd></td><td>Decrease speed -25 WPM</td></tr>
+            <tr><td><kbd>Right</kbd></td><td>Skip forward ~15 words</td></tr>
+            <tr><td><kbd>Left</kbd></td><td>Skip backward ~15 words</td></tr>
+            <tr><td><kbd>D</kbd></td><td>Toggle dark/light theme</td></tr>
+            <tr><td><kbd>R</kbd></td><td>Restart from beginning</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>Close settings panel</td></tr>
+            <tr><td><kbd>?</kbd></td><td>Open settings / shortcuts</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resume Modal -->
+  <div id="resume-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Resume Reading?</h3>
+      <p id="resume-info"></p>
+      <div class="modal-actions">
+        <button id="resume-yes-btn" class="btn btn-primary">Resume</button>
+        <button id="resume-no-btn" class="btn btn-secondary">Start Over</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CDN Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- PDF.js (local, loaded lazily by parser.js) -->
+  <!-- App Modules -->
+  <script src="js/storage.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/display.js"></script>
+  <script src="js/reader.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
